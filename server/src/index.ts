@@ -1,21 +1,23 @@
 import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
+import session from 'express-session';
 import groupRoutes from './routes/groupRoutes';
 import itineraryRoutes from './routes/itineraryRoutes';
 import userRoutes from './routes/userRoutes';
 import { configureKinde, protectRoute } from './services/kinde';
 import openai from './services/openai';
-import pinecone from './services/pinecone';
 import pineconeIndex from './services/pinecone';
 import prisma from './services/prisma';
-import session from 'express-session';
 
 // Load environment variables
 dotenv.config();
 
 // Initialize Express app
 const app = express();
+const port = process.env.PORT || 5000;
+
+// Session middleware (required for Kinde)
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'supersecret',
@@ -24,12 +26,11 @@ app.use(
     cookie: { secure: false }, // set to true if using HTTPS
   })
 );
-const port = process.env.PORT || 5000;
 
 // Setup Kinde authentication
 configureKinde(app);
 
-// Middleware
+// CORS middleware for frontend (localhost:5173)
 app.use(
   cors({
     origin: 'http://localhost:5173',
@@ -39,7 +40,7 @@ app.use(
 app.use(express.json());
 
 // Example protected route to test Kinde auth
-app.get('/api/protected', protectRoute, (req, res) => {
+app.get('/api/protected', protectRoute, (_req, res) => {
   res.json({ message: 'You are authenticated with Kinde!' });
 });
 

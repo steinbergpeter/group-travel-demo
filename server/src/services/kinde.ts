@@ -20,8 +20,7 @@ export function configureKinde(app: Express) {
       `${process.env.KINDE_SITE_URL}/kinde_callback`,
     postLogoutRedirectUrl:
       process.env.KINDE_POST_LOGOUT_REDIRECT_URL || process.env.KINDE_SITE_URL!,
-    unAuthorisedUrl:
-      process.env.KINDE_UNAUTHORISED_URL || process.env.KINDE_SITE_URL!,
+    unAuthorisedUrl: `${process.env.KINDE_ISSUER_BASE_URL}/login?client_id=${process.env.KINDE_CLIENT_ID}&redirect_uri=${process.env.KINDE_REDIRECT_URL}`,
     grantType: 'AUTHORIZATION_CODE' as GrantType.AUTHORIZATION_CODE,
     scope: process.env.KINDE_SCOPE || 'openid profile email',
   };
