@@ -21,7 +21,7 @@ const Home: React.FC = () => {
               </button>
             </Link>
             <Link to='/dashboard'>
-              <button className='border border-white text-white font-semibold px-6 py-3 rounded hover:bg-white hover:text-teal-700 transition'>
+              <button className='border border-white text-teal-600 bg-transparent font-semibold px-6 py-3 rounded hover:bg-white hover:text-teal-700 transition'>
                 View Demo
               </button>
             </Link>

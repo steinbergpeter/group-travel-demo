@@ -1,0 +1,105 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id            String          @id @default(uuid())
+    email         String          @unique
+    name          String
+    createdAt     DateTime        @default(now())
+    updatedAt     DateTime        @updatedAt
+    groups        GroupMember[]
+    preferences   UserPreference?
+    comments      Comment[]
+    votes         Vote[]
+    createdGroups Group[]         @relation("GroupCreator")
+}
+
+model Group {
+    id          String        @id @default(uuid())
+    name        String
+    description String?
+    destination String?
+    startDate   DateTime?
+    endDate     DateTime?
+    createdAt   DateTime      @default(now())
+    updatedAt   DateTime      @updatedAt
+    creatorId   String
+    creator     User          @relation("GroupCreator", fields: [creatorId], references: [id])
+    members     GroupMember[]
+    itineraries Itinerary[]
+    comments    Comment[]
+    votes       Vote[]
+}
+
+model GroupMember {
+    id       String   @id @default(uuid())
+    userId   String
+    groupId  String
+    joinedAt DateTime @default(now())
+    user     User     @relation(fields: [userId], references: [id])
+    group    Group    @relation(fields: [groupId], references: [id])
+
+    @@unique([userId, groupId])
+}
+
+model UserPreference {
+    id              String   @id @default(uuid())
+    userId          String   @unique
+    user            User     @relation(fields: [userId], references: [id])
+    travelStyle     String[] // e.g., ["adventure", "relaxation", "culture"]
+    budget          Int // Budget in USD
+    mustHaves       String[] // e.g., ["beach", "museums", "nightlife"]
+    avoidList       String[] // e.g., ["hiking", "crowds"]
+    foodPrefs       String[] // e.g., ["local", "vegetarian"]
+    activityLevel   String // e.g., "high", "medium", "low"
+    additionalNotes String?
+    createdAt       DateTime @default(now())
+    updatedAt       DateTime @updatedAt
+}
+
+model Itinerary {
+    id          String    @id @default(uuid())
+    groupId     String
+    group       Group     @relation(fields: [groupId], references: [id])
+    title       String
+    description String?
+    content     Json // Structured itinerary content
+    isFinalized Boolean   @default(false)
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+    comments    Comment[]
+    votes       Vote[]
+}
+
+model Comment {
+    id          String     @id @default(uuid())
+    content     String
+    userId      String
+    user        User       @relation(fields: [userId], references: [id])
+    groupId     String?
+    group       Group?     @relation(fields: [groupId], references: [id])
+    itineraryId String?
+    itinerary   Itinerary? @relation(fields: [itineraryId], references: [id])
+    createdAt   DateTime   @default(now())
+    updatedAt   DateTime   @updatedAt
+}
+
+model Vote {
+    id          String     @id @default(uuid())
+    value       Int // +1 (like), -1 (dislike), or other values for rankings
+    userId      String
+    user        User       @relation(fields: [userId], references: [id])
+    groupId     String?
+    group       Group?     @relation(fields: [groupId], references: [id])
+    itineraryId String?
+    itinerary   Itinerary? @relation(fields: [itineraryId], references: [id])
+    createdAt   DateTime   @default(now())
+
+    @@unique([userId, itineraryId])
+}
